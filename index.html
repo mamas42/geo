@@ -2,17 +2,22 @@
 <html>
 <body>
 <script>
-const p = new URLSearchParams(location.search);
-const returnUrl = p.get("return");
-
 navigator.geolocation.getCurrentPosition(pos => {
+    console.log("LAT:", pos.coords.latitude);
+    console.log("LNG:", pos.coords.longitude);
+
+    const p = new URLSearchParams(location.search);
+    const returnUrl = p.get("return");
+
     const url = new URL(returnUrl);
     url.searchParams.set("lat", pos.coords.latitude);
     url.searchParams.set("lng", pos.coords.longitude);
-    window.location.replace(url.toString());
-}, () => {
-    window.location.replace(returnUrl);
+
+    console.log("REDIRECT TO:", url.toString());
+
+    window.location.href = url.toString();
 });
 </script>
+
 </body>
 </html>
