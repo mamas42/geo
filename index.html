@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Location Service</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<script>
+(function () {
+    const params = new URLSearchParams(window.location.search);
+
+    const returnUrl = params.get("return");
+    const postUrl   = params.get("post"); // API بک‌اند تو
+
+    if (!returnUrl || !postUrl) {
+        document.body.innerText = "Invalid request";
+        return;
+    }
+
+    if (!navigator.geolocation) {
+        redirect({ error: "not_supported" });
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        success,
+        error,
+        { enableHighAccuracy: true, timeout: 10000 }
+    );
+
+    function success(pos) {
+        const payload = {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            accuracy: pos.coords.accuracy
+        };
+
+        fetch(postUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        })
+        .catch(() => {})
+        .finally(() => {
+            redirect({ ok: 1 });
+        });
+    }
+
+    function error(err) {
+        redirect({ error: err.code });
+    }
+
+    function redirect(extra) {
+        const url = new URL(returnUrl);
+        Object.keys(extra).forEach(k => url.searchParams.set(k, extra[k]));
+        window.location.replace(url.toString());
+    }
+})();
+</script>
+
+</body>
+</html>
